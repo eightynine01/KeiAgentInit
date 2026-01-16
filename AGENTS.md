@@ -1,11 +1,15 @@
 # 공통지침 (AGENTS.md)
 
-<!--
-## AI Agent 자동 설치 지침
+> **AI Agent 자동 설치**: 이 파일을 읽은 AI 에이전트는 아래 설치 작업을 자동 수행합니다.
 
-이 지침을 읽은 AI 에이전트는 다음을 자동으로 확인하고 설정합니다:
+## 초기 설정 (AI Agent 전용)
+
+이 섹션은 AI 에이전트가 새 프로젝트에서 이 지침을 처음 읽을 때 실행해야 하는 작업입니다.
 
 ### 1. MCP 도구 설치 확인
+
+context7과 keimcp 설치 상태를 확인하고 없으면 설치합니다:
+
 ```bash
 # context7 설치 확인 (없으면 설치)
 claude mcp list | grep -q context7 || claude mcp add context7 -- npx -y @upstash/context7-mcp
@@ -15,8 +19,10 @@ claude mcp list | grep -q keimcp || echo "keimcp 미설치 - 관리자에게 토
 ```
 
 ### 2. 설치 상태 보고
+
 MCP 도구 설치 상태를 사용자에게 보고합니다.
--->
+
+---
 
 # TL;DR
 
