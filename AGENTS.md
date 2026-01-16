@@ -1,21 +1,6 @@
 # 공통지침 (AGENTS.md)
 
-> AI 코딩 에이전트를 위한 프로젝트 공통 지침서
-> 지원 도구: Claude Code, Gemini CLI, GitHub Copilot, Cursor, Windsurf, Cline, Aider, Continue, Amazon Q, Codex CLI, OpenCode
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  Version: 2.1.0                                             │
-│  Updated: 2026-01-16                                        │
-│                                                             │
-│  관리 방식: Git Submodule (Single Source of Truth)          │
-│  리포지토리: github.com/eightynine01/kei-agents-config      │
-└─────────────────────────────────────────────────────────────┘
-```
-
----
-
-# TL;DR (Quick Reference)
+# TL;DR
 
 ## CONTEXT
 ```
@@ -194,53 +179,7 @@ get_dashboard(uid)
 
 ---
 
-# 상세 지침 (Full Documentation)
-
-## 버전 히스토리
-
-| 버전 | 날짜 | 변경 내용 |
-|------|------|----------|
-| **2.1.0** | 2026-01-16 | Git Submodule 기반 Single Source of Truth 전환 |
-| 2.0.0 | 2026-01-16 | 11개 AI 에이전트 지원, KeiBase 원칙, 20개 스킬, Quick Reference |
-| 1.1.0 | 2026-01-16 | MCP 도구 연동 가이드 추가 |
-| 1.0.0 | 2026-01-15 | 초기 버전 (Planning-with-Files, Git Flow, 배포 가이드) |
-
----
-
-## 지원 에이전트 목록
-
-이 파일은 11개의 AI 코딩 에이전트에서 공통으로 사용됩니다.
-
-### 설정 파일 매핑
-
-| 에이전트 | 설정 파일 | 연결 방식 |
-|----------|----------|-----------|
-| **Claude Code** | `CLAUDE.md` | 심볼릭 링크 → .agents/AGENTS.md |
-| **Gemini CLI** | `AGENTS.md` | 심볼릭 링크 → .agents/AGENTS.md |
-| **GitHub Copilot** | `.github/copilot-instructions.md` | 심볼릭 링크 → .agents/AGENTS.md |
-| **Cursor** | `.cursorrules` | 심볼릭 링크 → .agents/AGENTS.md |
-| **Windsurf** | `.windsurfrules` | 심볼릭 링크 → .agents/AGENTS.md |
-| **Cline** | `.clinerules` | 심볼릭 링크 → .agents/AGENTS.md |
-| **Aider** | `.aider.conf.yml` | `read: [.agents/AGENTS.md]` 설정 |
-| **Continue** | `.continue/config.json` | contextProviders 설정 |
-| **Amazon Q** | `.amazon-q/instructions.md` | 심볼릭 링크 → .agents/AGENTS.md |
-| **Codex CLI** | `.codex/instructions.md` | 심볼릭 링크 → .agents/AGENTS.md |
-| **OpenCode** | - | 수동 참조 |
-
-### 설치 방법
-
-```bash
-# 1. Submodule 추가 (최초 1회)
-git submodule add https://github.com/eightynine01/kei-agents-config.git .agents
-
-# 2. 심볼릭 링크 설정
-.agents/scripts/setup-agents.sh --setup
-
-# 3. 상태 확인
-.agents/scripts/setup-agents.sh --status
-```
-
----
+# 상세 지침
 
 ## 작업 계획 패턴 (Planning-with-Files)
 
@@ -713,22 +652,8 @@ rollback_application(name="my-app", revision=2)
 │   ├── task_plan.md
 │   ├── findings.md
 │   └── progress.md
-├── .agents/                # Git Submodule (kei-agents-config)
-│   ├── AGENTS.md
-│   └── scripts/setup-agents.sh
-├── AGENTS.md               # -> .agents/AGENTS.md (심볼릭 링크)
-├── CLAUDE.md               # -> .agents/AGENTS.md (심볼릭 링크)
-├── .cursorrules            # -> .agents/AGENTS.md (심볼릭 링크)
-├── .windsurfrules          # -> .agents/AGENTS.md (심볼릭 링크)
-├── .clinerules             # -> .agents/AGENTS.md (심볼릭 링크)
-├── .github/
-│   └── copilot-instructions.md  # -> ../.agents/AGENTS.md
-├── .amazon-q/
-│   └── instructions.md     # -> ../.agents/AGENTS.md
-├── .codex/
-│   └── instructions.md     # -> ../.agents/AGENTS.md
-├── .aider.conf.yml         # Aider 설정
-└── .continue/config.json   # Continue 설정
+└── .agents/                # 공통 지침 (Git Submodule)
+    └── AGENTS.md
 ```
 
 ## 명령어
@@ -780,11 +705,3 @@ ruff check .                # 린트 검사
 | **스키마 추론** | `/api/v1/schema` | 컬렉션 스키마 자동 감지 |
 | **헬스 체크** | `/healthz`, `/api/v1/health` | K8s probe 호환 |
 
----
-
-## 참고 링크
-
-- **KeiMCP**: MCP 서버 (340+ 도구)
-- **KeiBase**: AI 친화적 BaaS 플랫폼
-- **KeiInfra**: Kubernetes 인프라 구성
-- **Planning-with-Files**: https://github.com/OthmanAdi/planning-with-files
