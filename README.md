@@ -2,11 +2,26 @@
 
 AI 코딩 에이전트를 위한 공통 지침 시스템
 
-## 설치 방법
+## 빠른 설치 (권장)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/eightynine01/KeiAgentInit/main/install.sh | bash
+```
+
+## AI Agent 자동 설치
+
+Claude Code 세션에서 다음을 붙여넣기:
+
+```
+Install and configure by following the instructions here:
+https://raw.githubusercontent.com/eightynine01/KeiAgentInit/main/AGENTS.md
+```
+
+## 수동 설치
 
 ```bash
 # 1. Submodule 추가
-git submodule add https://github.com/eightynine01/KeiAgentInit.git .agents
+git submodule add git@github.com:eightynine01/KeiAgentInit.git .agents
 
 # 2. 심볼릭 링크 설정
 .agents/scripts/setup-agents.sh --setup
@@ -14,7 +29,19 @@ git submodule add https://github.com/eightynine01/KeiAgentInit.git .agents
 # 3. 커밋
 git add .gitmodules .agents AGENTS.md CLAUDE.md .cursorrules .windsurfrules .clinerules
 git add .github/copilot-instructions.md .amazon-q/ .codex/ .aider.conf.yml .continue/
-git commit -m "feat: KeiAgentInit submodule 추가"
+git commit -m "feat: KeiAgentInit 추가"
+```
+
+## MCP 도구 설치
+
+```bash
+# context7 (라이브러리 문서 참조)
+claude mcp add context7 -- npx -y @upstash/context7-mcp
+
+# keimcp (인프라 관리 - 토큰 필요)
+claude mcp add keimcp --transport sse \
+  --url https://mcp.keiailab.dev/sse \
+  --header "Authorization: Bearer <TOKEN>"
 ```
 
 ## 업데이트
@@ -22,20 +49,4 @@ git commit -m "feat: KeiAgentInit submodule 추가"
 ```bash
 cd .agents && git pull origin main && cd ..
 git add .agents && git commit -m "chore: KeiAgentInit 업데이트"
-```
-
-## 스크립트 사용법
-
-```bash
-.agents/scripts/setup-agents.sh --setup   # 심볼릭 링크 설정
-.agents/scripts/setup-agents.sh --status  # 상태 확인
-.agents/scripts/setup-agents.sh --clean   # 심볼릭 링크 제거
-```
-
-## 클론 시 초기화
-
-```bash
-git clone --recurse-submodules <repo-url>
-# 또는
-git submodule update --init --recursive
 ```
