@@ -1,6 +1,6 @@
 #!/bin/bash
-# KeiAgentInit 설치 스크립트
-# 사용법: curl -fsSL https://raw.githubusercontent.com/eightynine01/KeiAgentInit/main/install.sh | bash
+# KeiMcpInit 설치 스크립트
+# 사용법: curl -fsSL https://raw.githubusercontent.com/eightynine01/KeiMcpInit/main/install.sh | bash
 
 set -e
 
@@ -12,7 +12,7 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}  KeiAgentInit 설치${NC}"
+echo -e "${BLUE}  KeiMcpInit 설치${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 
@@ -29,8 +29,8 @@ if [ -d ".agents" ]; then
     echo -e "${YELLOW}  .agents 디렉토리가 이미 존재합니다. 업데이트합니다.${NC}"
     cd .agents && git pull origin main && cd ..
 else
-    git submodule add git@github.com:eightynine01/KeiAgentInit.git .agents 2>/dev/null || \
-    git submodule add https://github.com/eightynine01/KeiAgentInit.git .agents
+    git submodule add git@github.com:eightynine01/KeiMcpInit.git .agents 2>/dev/null || \
+    git submodule add https://github.com/eightynine01/KeiMcpInit.git .agents
 fi
 echo -e "${GREEN}  완료${NC}"
 
@@ -68,10 +68,10 @@ echo ""
 echo -e "${BLUE}[4/4] 설치 완료!${NC}"
 echo ""
 echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}  KeiAgentInit 설치 완료${NC}"
+echo -e "${GREEN}  KeiMcpInit 설치 완료${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo ""
 echo "다음 명령으로 커밋하세요:"
 echo -e "${BLUE}  git add .gitmodules .agents AGENTS.md CLAUDE.md .cursorrules .windsurfrules .clinerules${NC}"
 echo -e "${BLUE}  git add .github/copilot-instructions.md .amazon-q/ .codex/ .aider.conf.yml .continue/${NC}"
-echo -e "${BLUE}  git commit -m \"feat: KeiAgentInit 추가\"${NC}"
+echo -e "${BLUE}  git commit -m \"feat: KeiMcpInit 추가\"${NC}"
