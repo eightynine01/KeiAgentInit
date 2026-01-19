@@ -1,0 +1,29 @@
+{
+  "$schema": "https://continue.dev/config-schema.json",
+  "models": [],
+  "customCommands": [],
+  "contextProviders": [
+    {
+      "name": "file",
+      "params": {
+        "path": ".agents/AGENTS.md"
+      }
+    },
+    {
+      "name": "code"
+    },
+    {
+      "name": "docs"
+    }
+  ],
+  "slashCommands": [
+    {
+      "name": "deploy",
+      "description": "Deploy application via ArgoCD"
+    },
+    {
+      "name": "rollback",
+      "description": "Rollback to previous version"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+# Aider configuration - reads AGENTS.md as system prompt
+# https://aider.chat/docs/config/aider_conf.html
+
+read:
+  - .agents/AGENTS.md
+
+# Git 설정
+auto-commits: false
+dirty-commits: false
+
+# 코드 스타일
+lint-cmd: "ruff check --fix"
+
