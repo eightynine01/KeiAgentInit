@@ -12,6 +12,63 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
+# 스크립트 옵션 파싱
+SKIP_VAULT=false
+SKIP_MCP=false
+SKIP_SUBMODULE=false
+SKIP_LINKS=false
+SKIP_COMMIT=false
+
+# 옵션 파싱
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --skip-vault)
+            SKIP_VAULT=true
+            shift
+            ;;
+        --skip-mcp)
+            SKIP_MCP=true
+            shift
+            ;;
+        --skip-submodule)
+            SKIP_SUBMODULE=true
+            shift
+            ;;
+        --skip-links)
+            SKIP_LINKS=true
+            shift
+            ;;
+        --skip-commit)
+            SKIP_COMMIT=true
+            shift
+            ;;
+        --help|-h)
+            echo "사용법: $0 [옵션]"
+            echo ""
+            echo "옵션:"
+            echo "  --skip-vault     Vault 연결 확인 스킵"
+            echo "  --skip-mcp       MCP 도구 확인 스킵"
+            echo "  --skip-submodule Submodule 추가 스킵"
+            echo "  --skip-links     심볼릭 링크 설정 스킵"
+            echo "  --skip-commit    커밋 메시지 스킵"
+            echo "  --help, -h     도움말 표시"
+            exit 0
+            ;;
+        *)
+            echo -e "${RED}알 수 없는 옵션: $1${NC}"
+            echo "사용법: $0 [--skip-vault] [--skip-mcp] [--skip-submodule] [--skip-links] [--skip-commit]"
+            exit 1
+            ;;
+    esac
+done
+
+# 진행 상태 출력 함수
+show_step() {
+    local step=$1
+    local message=$2
+    echo -e "${BLUE}[${step}/4]${NC} ${message}..."
+}
+
 echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}  KeiMcpInit 설치${NC}"
 echo -e "${BLUE}========================================${NC}"
@@ -33,6 +90,102 @@ CLAUDE_DESKTOP_CONFIG="$HOME/Library/Application Support/Claude/claude_desktop_c
 CODEX_CONFIG="$HOME/.codex/config.toml"
 CURSOR_CONFIG="$HOME/Library/Application Support/Cursor/User/mcp.json"
 GEMINI_CONFIG="$HOME/.gemini-cli/settings.json"
+
+# Vault 연결 확인 함수
+check_vault_connection() {
+    local vault_accessible=false
+    local is_keibase_vault=false
+
+    echo -e "${CYAN}🔍 KeiBase Vault 연결 확인 중...${NC}"
+
+    # kubectl 설치 여부 확인
+    if command -v kubectl &> /dev/null; then
+        echo -e "  ${BLUE}kubectl 설치됨 - kube-system 네임스페이스 확인${NC}"
+
+        # Vault pod 확인
+        local vault_pod=$(kubectl get pods -n kube-system -l app=vault -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || echo "")
+
+        if [ -n "$vault_pod" ]; then
+            echo -e "  ${GREEN}✓ Vault pod 발견: $vault_pod${NC}"
+
+            # KeiBase Vault 확인 (KeiMcp 관련)
+            echo -e "  ${BLUE}KeiBase Vault 확인 중...${NC}"
+            if kubectl exec -n kube-system "$vault_pod" -- vault kv get keibase/config 2>/dev/null || \
+               kubectl exec -n kube-system "$vault_pod" -- vault kv list keibase/ 2>/dev/null; then
+                is_keibase_vault=true
+                echo -e "  ${GREEN}✓ KeiBase Vault 확인${NC}"
+            else
+                echo -e "  ${YELLOW}⚠️  KeiBase Vault 아님 (HashiCorp Vault)${NC}"
+            fi
+
+            # Vault 연결 테스트
+            if [ "$is_keibase_vault" = true ]; then
+                echo -e "  ${BLUE}Vault 연결 테스트 중...${NC}"
+                if kubectl exec -n kube-system "$vault_pod" -- vault status &> /dev/null; then
+                    vault_accessible=true
+                    echo -e "  ${GREEN}✓ Vault에 접근 가능${NC}"
+                else
+                    echo -e "  ${YELLOW}⚠️  Vault pod 실행 중이지만 연결 실패${NC}"
+                fi
+            else
+                echo -e "  ${YELLOW}⚠️  KeiBase Vault 아님 - 토큰 조회 스킵${NC}"
+                vault_accessible=false
+            fi
+        else
+            echo -e "  ${YELLOW}⚠️  Vault pod를 찾을 수 없음 (kube-system 네임스페이스)${NC}"
+        fi
+    else
+        echo -e "  ${YELLOW}⚠️  kubectl 미설치 - Vault 연결 확인 스킵${NC}"
+    fi
+
+    echo ""
+
+    if [ "$vault_accessible" = false ]; then
+        echo -e "${RED}❌ KeiBase Vault 접근 불가${NC}"
+        echo ""
+        echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo -e "${YELLOW}📋 Vault 접근 확인 방법${NC}"
+        echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo ""
+        echo -e "${CYAN}1. 쿠버네티스 네임스페이스 확인:${NC}"
+        echo -e "  ${BLUE}kubectl get namespaces${NC}"
+        echo ""
+        echo -e "${CYAN}2. Vault pod 확인:${NC}"
+        echo -e "  ${BLUE}kubectl get pods -n kube-system -l app=vault${NC}"
+        echo ""
+        echo -e "${CYAN}3. Vault pod 로그 확인:${NC}"
+        echo -e "  ${BLUE}kubectl logs -n kube-system <vault-pod-name> | tail -100${NC}"
+        echo ""
+        echo -e "${CYAN}4. Vault 상태 확인 (exec):${NC}"
+        echo -e "  ${BLUE}kubectl exec -n kube-system <vault-pod-name> -- vault status${NC}"
+        echo ""
+        echo -e "${YELLOW}💡 위 명령으로 Vault 상태를 확인 후, KeiBase Vault에 접근 가능한지 확인해주세요.${NC}"
+        echo ""
+        return 1
+    fi
+
+    echo ""
+
+    # KeiBase Vault인 경우 keimcp 토큰 조회 안내
+    if [ "$is_keibase_vault" = true ] && [ "$vault_accessible" = true ]; then
+        echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo -e "${CYAN}🔐 keimcp 토큰 조회${NC}"
+        echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo ""
+        echo -e "${YELLOW}💡 KeiBase Vault에 직접 접근해서 keimcp 토큰을 조회할 수 있습니다.${NC}"
+        echo ""
+        echo -e "${CYAN}방법 1: Vault CLI 사용 (kubectl exec)${NC}"
+        echo -e "  ${BLUE}kubectl exec -n kube-system <vault-pod> -- vault kv get keibase/config${NC}"
+        echo ""
+        echo -e "${CYAN}방법 2: KeiBase 웹 콘솔 접근${NC}"
+        echo -e "  ${BLUE}  브라우저에서 KeiBase 대시보드 접근${NC}"
+        echo ""
+        echo -e "${YELLOW}⚠️  Vault에 직접 접근하려면 관리자 권한이 필요합니다.${NC}"
+        echo ""
+    fi
+
+    return 0
+}
 
 # 플랫폼 감지 함수
 detect_platforms() {
@@ -466,6 +619,9 @@ if [ ${#platforms[@]} -eq 0 ]; then
 else
     echo -e "${GREEN}  ✓ 감지된 플랫폼: ${platforms[*]}${NC}"
 fi
+
+# KeiBase Vault 연결 확인
+check_vault_connection
 
 # context7 확인
 check_context7
